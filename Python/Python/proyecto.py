@@ -1,4 +1,5 @@
 import os
+import re
 
 class Usuario:
     def __init__(self, id, nombre, apellido, correo, telefono):
@@ -18,7 +19,35 @@ class GestorUsuarios:
             with open(self.archivo, 'w') as f:
                 pass
 
+    def validar_nombre(self, nombre):
+        if re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', nombre):
+            return True
+        print("El nombre solo puede contener letras.")
+        return False
+
+    def validar_apellido(self, apellido):
+        if re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$', apellido):
+            return True
+        print("El apellido solo puede contener letras.")
+        return False
+
+    def validar_correo(self, correo):
+        if re.match(r'^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$', correo):
+            return True
+        print("El correo no es válido.")
+        return False
+
+    def validar_telefono(self, telefono):
+        if re.match(r'^\+?\d{5,15}$', telefono):
+            return True
+        print("El teléfono no es válido. Debe contener entre 5 y 15 dígitos.")
+        return False
+
     def registrar_usuario(self, nombre, apellido, correo, telefono):
+        if not (self.validar_nombre(nombre) and self.validar_apellido(apellido) and 
+                self.validar_correo(correo) and self.validar_telefono(telefono)):
+            print("Registro de usuario fallido debido a datos inválidos.")
+            return
         id = self._generar_id()
         usuario = Usuario(id, nombre, apellido, correo, telefono)
         with open(self.archivo, 'a') as f:
@@ -38,6 +67,15 @@ class GestorUsuarios:
         usuarios = self._cargar_usuarios()
         for usuario in usuarios:
             if usuario.id == id:
+                if nombre and not self.validar_nombre(nombre):
+                    return
+                if apellido and not self.validar_apellido(apellido):
+                    return
+                if correo and not self.validar_correo(correo):
+                    return
+                if telefono and not self.validar_telefono(telefono):
+                    return
+
                 if nombre:
                     usuario.nombre = nombre
                 if apellido:
@@ -46,6 +84,7 @@ class GestorUsuarios:
                     usuario.correo = correo
                 if telefono:
                     usuario.telefono = telefono
+
                 self._guardar_usuarios(usuarios)
                 print(f"Usuario con ID {id} actualizado.")
                 return
